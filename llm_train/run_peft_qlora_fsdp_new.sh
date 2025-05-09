@@ -6,6 +6,7 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --add_special_tokens False \
 --append_concat_token False \
 --splits "train,test" \
+--label_names ["labels"] \
 --max_seq_len 4096 \
 --max_src_length 3650 \
 --num_train_epochs 1 \
