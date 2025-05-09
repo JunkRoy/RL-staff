@@ -291,7 +291,7 @@ def main(model_args, data_args, training_args):
     keys = []
 
     for item in train_dataset:
-        keys+=list(item.keys())
+        keys += list(item.keys())
         # if "labels" not in item:
         #     print(item)
         #     exit()
@@ -336,6 +336,7 @@ def main(model_args, data_args, training_args):
     }
     args.dataset_text_field = data_args.dataset_text_field,
     args.max_seq_length = data_args.max_seq_length
+    args.remove_unused_columns = Fasle
     # data_args.label_names = ["labels"]
 
     # trainer

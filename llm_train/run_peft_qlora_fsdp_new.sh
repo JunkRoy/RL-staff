@@ -18,7 +18,6 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --save_steps 50 \
 --bf16 True \
 --packing False \
---remove_unused_columns Fasle \
 --learning_rate 1e-4 \
 --lr_scheduler_type "cosine" \
 --weight_decay 1e-4 \
