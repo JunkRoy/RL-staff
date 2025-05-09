@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from transformers import HfArgumentParser, TrainingArguments, set_seed
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
 # from utils import create_and_prepare_model, create_datasets
 import json
 # from torch.utils.data import Dataset
@@ -305,6 +305,19 @@ def main(model_args, data_args, training_args):
     # print(f"training_args:{training_args}")
 
     data_collator = DataCollator(tokenizer)
+
+    # update configs
+    dict_args = training_args.to_dict()
+    dict_args.pop("push_to_hub_token")
+    args = SFTConfig(**dict_args)
+
+    args.packing = data_args.packing
+    args.dataset_kwargs = {
+        "append_concat_token": data_args.append_concat_token,
+        "add_special_tokens": data_args.add_special_tokens,
+    }
+    args.dataset_text_field = data_args.dataset_text_field,
+    args.max_seq_length = data_args.max_seq_length
 
     # trainer
     trainer = SFTTrainer(
