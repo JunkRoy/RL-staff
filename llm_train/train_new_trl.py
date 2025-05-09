@@ -103,6 +103,7 @@ class DataCollator(object):
         self.pad_token_id = tokenizer.pad_token_id
 
     def __call__(self, batch):
+        print(f"batch: {batch}")
         lengths = [len(instance["input_ids"]) for instance in batch]
 
         # batch_max_len = max(max(lengths), 4608)
@@ -287,12 +288,14 @@ def main(model_args, data_args, training_args):
     for item in train_dataset:
         if "labels" not in item:
             print(item)
+            exit()
         # print(f"train_dataset: {item}")
         # break
 
     for item in eval_dataset:
         if "labels" not in item:
             print(item)
+            exit()
         # print(f"eval_dataset: {item}")
         # break
 
