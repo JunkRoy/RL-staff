@@ -1,4 +1,4 @@
-CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.yaml"  train_new.py \
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.yaml"  train_new_trl.py \
 --seed 100 \
 --model_name_or_path "/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct/" \
 --train_path "/iyunwen/data/work/syshen/data/yw_greeting_dataset/greetings_train.jsonl" \
