@@ -28,6 +28,7 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --gradient_accumulation_steps 1 \
 --gradient_checkpointing True \
 --use_reentrant True \
+--use_liger_kernel True \
 --use_flash_attn False \
 --use_peft_lora True \
 --lora_r 8 \

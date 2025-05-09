@@ -113,17 +113,18 @@ class DataCollator(object):
         input_ids_batch, labels_batch = [], []
         for instance in batch:
             input_ids = instance["input_ids"]
-            labels = instance["labels"]
+            # if args.use_liger_kernel
+            # labels = instance["labels"]
 
             padding_len = batch_max_len - len(input_ids)
             input_ids = input_ids + [self.pad_token_id] * padding_len
-            labels = labels + [-100] * padding_len
+            # labels = labels + [-100] * padding_len
 
             input_ids_batch.append(input_ids)
-            labels_batch.append(labels)
+            # labels_batch.append(labels)
 
-        return {"input_ids": torch.tensor(input_ids_batch, dtype=torch.long),
-                "labels": torch.tensor(labels_batch, dtype=torch.long)}
+        return {"input_ids": torch.tensor(input_ids_batch, dtype=torch.long)}#,
+                # "labels": torch.tensor(labels_batch, dtype=torch.long)}
 
 
 # Define and parse arguments.
@@ -336,7 +337,7 @@ def main(model_args, data_args, training_args):
     }
     args.dataset_text_field = data_args.dataset_text_field,
     args.max_seq_length = data_args.max_seq_length
-    args.remove_unused_columns = False
+    # args.remove_unused_columns = False
     args.label_names = ["labels"]
 
     # data_args.label_names = ["labels"]
