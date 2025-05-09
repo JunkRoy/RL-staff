@@ -36,6 +36,5 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --lora_target_modules "all-linear" \
 --use_4bit_quantization True \
 --use_nested_quant True \
---use_liger_kernel False \
 --bnb_4bit_compute_dtype "bfloat16" \
 --bnb_4bit_quant_storage_dtype "bfloat16"
