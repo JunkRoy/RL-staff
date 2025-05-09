@@ -1,8 +1,8 @@
-CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file "configs/fsdp_config_qlora.yaml"  train_new.py \
+CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.yaml"  train_new.py \
 --seed 100 \
---model_name_or_path "/data/work/lcong/public_model_path/Qwen1.5-72B-Chat/" \
---train_path "/data/work/lcong/ChatGPT/Qwen2-Finetuning/self_cognition2.json" \
---test_path "/data/work/lcong/ChatGPT/Qwen2-Finetuning/self_cognition2.json" \
+--model_name_or_path "/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct/" \
+--train_path "/iyunwen/data/work/syshen/data/yw_greeting_dataset/greetings_train.jsonl" \
+--test_path "/iyunwen/data/work/syshen/data/yw_greeting_dataset/greetings_test.jsonl" \
 --add_special_tokens False \
 --append_concat_token False \
 --splits "train,test" \
@@ -22,7 +22,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --config_file "configs/fsdp_confi
 --weight_decay 1e-4 \
 --warmup_ratio 0.0 \
 --max_grad_norm 1.0 \
---output_dir "qwen1.5-72b-qlora-fsdp-v2" \
+--output_dir "qwen3-32b-qlora-fsdp" \
 --per_device_train_batch_size 1 \
 --per_device_eval_batch_size 1 \
 --gradient_accumulation_steps 1 \
