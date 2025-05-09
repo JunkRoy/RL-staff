@@ -63,6 +63,9 @@ def build_qwen2_prompt_dataset(data_path, tokenizer, max_len, max_src_len, is_sk
                 response_tokens = response_tokens[:max_tgt_len]
                 skip_flag = True
 
+            print("before Input IDs total:", len(input_ids))
+            print("before Labels total:", len(labels))
+
             input_ids = system_tokens + input_ids + nl_tokens + response_tokens
             labels = [-100] * (len(system_tokens) + len(nl_tokens)) + labels + response_tokens[1:]
 
@@ -70,7 +73,14 @@ def build_qwen2_prompt_dataset(data_path, tokenizer, max_len, max_src_len, is_sk
                 skip_data_number += 1
                 continue
 
-            assert len(input_ids) == len(labels), f"len mismatch: {len(input_ids)} vs {len(labels)}"
+            # assert len(input_ids) == len(labels), f"len mismatch: {len(input_ids)} vs {len(labels)}"
+            if len(input_ids) != len(labels):
+                print("System tokens:", len(system_tokens))
+                print("Prompt tokens:", len(prompt_tokens))
+                print("Response tokens:", len(response_tokens))
+                print("Input IDs total:", len(input_ids))
+                print("Labels total:", len(labels))
+                raise ValueError("Mismatch between input_ids and labels length")
 
             examples.append({
                 "input_ids": input_ids,
