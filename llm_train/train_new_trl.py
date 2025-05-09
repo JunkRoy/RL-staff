@@ -27,84 +27,58 @@ def build_qwen2_prompt_dataset(data_path, tokenizer, max_len, max_src_len, is_sk
     im_end_tokens = tokenizer.encode("<|im_end|>")
 
     def _tokenize_str(role, content):
-        return f"{role}\n{content}", tokenizer.encode(role) + nl_tokens + tokenizer.encode(content)
+        return tokenizer.encode(role) + nl_tokens + tokenizer.encode(content)
 
-    input_ids_list, labels_list = [], []
+    examples = []
     skip_data_number = 0
 
-    with open(data_path, "r", encoding="utf-8") as fh:
-        for line in tqdm(fh):
+    with open(data_path, "r", encoding="utf-8") as f:
+        for line in f:
             skip_flag = False
             sample = json.loads(line.strip())
-            sample = [sample]
 
             input_ids, labels = [], []
+            system_tokens = im_start_tokens + _tokenize_str("system", sys_prompt) + im_end_tokens
 
-            if len(sample) > 1:
-                history = sample[:-1]
-                current = sample[-1]
-            else:
-                history = []
-                current = sample[0]
+            # 历史对话：可以忽略 history 的部分，如你需要可以加入
+            history = []
+            current = sample
 
-            # Add history
-            for chat in history:
-                _, query_tokens_part = _tokenize_str("user", chat["instruction"] + chat["input"])
-                query_tokens = im_start_tokens + query_tokens_part + im_end_tokens
+            # 构造 prompt
+            prompt_tokens = im_start_tokens + _tokenize_str("user",
+                                                            current["instruction"] + current["input"]) + im_end_tokens
 
-                _, response_tokens_part = _tokenize_str("assistant", chat["output"])
-                response_tokens = im_start_tokens + response_tokens_part + im_end_tokens
-
-                input_ids.extend(nl_tokens + query_tokens + nl_tokens + response_tokens)
-                labels.extend([-100] * (len(query_tokens) + 1 + len(nl_tokens) * 2) + response_tokens[1:])
-
-            # Add current input
-            prompt_id = im_start_tokens + _tokenize_str("user", current["instruction"] + current["input"])[
-                1] + im_end_tokens
-
-            if len(prompt_id) > max_src_len:
-                input_ids = nl_tokens + prompt_id[:max_src_len - 1] + [prompt_id[-1]]
-                labels = [-100] * len(input_ids)
-                skip_flag = True
-            else:
-                input_ids.extend(nl_tokens + prompt_id)
-                labels.extend([-100] * (len(prompt_id) + len(nl_tokens)))
-                if len(input_ids) > max_src_len:
-                    skip_flag = True
-                    input_ids = input_ids[-max_src_len:]
-                    labels = labels[-max_src_len:]
-
-            output_id = im_start_tokens + _tokenize_str("assistant", current["output"])[1] + im_end_tokens
-            max_tgt_len = max_len - len(input_ids) - len(
-                im_start_tokens + tokenizer.encode("system") + nl_tokens + tokenizer.encode(sys_prompt) + im_end_tokens)
-
-            if len(output_id) > max_tgt_len:
-                output_id = output_id[:max_tgt_len - 1] + [output_id[-1]]
+            if len(prompt_tokens) > max_src_len:
+                prompt_tokens = prompt_tokens[:max_src_len]
                 skip_flag = True
 
-            # Add system prompt
-            system_text, system_tokens_part = _tokenize_str("system", sys_prompt)
-            system_tokens = im_start_tokens + system_tokens_part + im_end_tokens
+            input_ids.extend(prompt_tokens)
+            labels.extend([-100] * len(prompt_tokens))
 
-            input_ids = system_tokens + input_ids + nl_tokens + output_id
-            labels = [-100] * len(system_tokens) + labels + [-100] * (1 + len(nl_tokens)) + output_id[1:]
+            # 构造 response
+            response_tokens = im_start_tokens + _tokenize_str("assistant", current["output"]) + im_end_tokens
+            max_tgt_len = max_len - len(system_tokens) - len(input_ids)
+
+            if len(response_tokens) > max_tgt_len:
+                response_tokens = response_tokens[:max_tgt_len]
+                skip_flag = True
+
+            input_ids = system_tokens + input_ids + nl_tokens + response_tokens
+            labels = [-100] * (len(system_tokens) + len(nl_tokens)) + labels + response_tokens[1:]
 
             if is_skip and skip_flag:
                 skip_data_number += 1
                 continue
 
-            input_ids_list.append(input_ids)
-            labels_list.append(labels)
+            assert len(input_ids) == len(labels), f"len mismatch: {len(input_ids)} vs {len(labels)}"
 
-    print(f"Skipped {skip_data_number} samples, {skip_data_number / (len(input_ids_list) + skip_data_number):.2%}")
+            examples.append({
+                "input_ids": input_ids,
+                "labels": labels
+            })
 
-    # Create HuggingFace dataset
-    dataset = Dataset.from_dict({
-        "input_ids": input_ids_list,
-        "labels": labels_list
-    })
-
-    return dataset
+    print(f"[INFO] 跳过了 {skip_data_number} 条数据，占比 {skip_data_number / (skip_data_number + len(examples)):.4f}")
+    return Dataset.from_list(examples)
 
 
 class DataCollator(object):
