@@ -17,7 +17,7 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --save_strategy "steps" \
 --save_steps 50 \
 --bf16 True \
---packing True \
+--packing False \
 --learning_rate 1e-4 \
 --lr_scheduler_type "cosine" \
 --weight_decay 1e-4 \
