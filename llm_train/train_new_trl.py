@@ -336,7 +336,9 @@ def main(model_args, data_args, training_args):
     }
     args.dataset_text_field = data_args.dataset_text_field,
     args.max_seq_length = data_args.max_seq_length
-    args.remove_unused_columns = False
+    # args.remove_unused_columns = False
+    args.label_names = ["labels"]
+
     # data_args.label_names = ["labels"]
 
     # trainer
