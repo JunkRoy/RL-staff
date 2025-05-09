@@ -285,12 +285,16 @@ def main(model_args, data_args, training_args):
     eval_dataset = build_qwen2_prompt_dataset(data_args.test_path, tokenizer, data_args.max_seq_length,
                                               data_args.max_src_length, True)
     for item in train_dataset:
-        print(f"train_dataset: {item}")
-        break
+        if "labels" not in item:
+            print(item)
+        # print(f"train_dataset: {item}")
+        # break
 
     for item in eval_dataset:
-        print(f"eval_dataset: {item}")
-        break
+        if "labels" not in item:
+            print(item)
+        # print(f"eval_dataset: {item}")
+        # break
 
     data_collator = DataCollator(tokenizer)
 
