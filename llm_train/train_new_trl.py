@@ -298,6 +298,11 @@ def main(model_args, data_args, training_args):
             exit()
         # print(f"eval_dataset: {item}")
         # break
+    print(f"=" * 30)
+    print(f"training_args:{training_args}")
+    print(f"=" * 30)
+
+    # print(f"training_args:{training_args}")
 
     data_collator = DataCollator(tokenizer)
 
