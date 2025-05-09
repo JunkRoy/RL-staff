@@ -12,7 +12,7 @@ CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.ya
 --logging_steps 5 \
 --log_level "info" \
 --logging_strategy "steps" \
---evaluation_strategy "epoch" \
+--eval_strategy "epoch" \
 --save_strategy "steps" \
 --save_steps 50 \
 --bf16 True \
