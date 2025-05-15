@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=7 nohup trl vllm-serve --model "/iyunwen/data/public_pretrain_models/Qwen2.5-3B-Instruct/" --gpu_memory_utilization 0.5 > ./log_vllm.log 2>&1 &

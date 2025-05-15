@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0,1 ACCELERATE_LOG_LEVEL=info accelerate launch --config_file zero2.yaml --num_processes=2 train_dpo.py --config config_demo.yaml

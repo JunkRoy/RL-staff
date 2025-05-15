@@ -86,10 +86,11 @@ def build_qwen2_prompt_dataset(data_path, tokenizer, max_len, max_src_len, is_sk
 
             assert len(input_ids) == len(labels)
             assert len(input_ids) <= max_len + 10
+            attention_mask = [1] * len(input_ids)
             if is_skip and skip_flag:
                 skip_data_number += 1
                 continue
-            all_data.append({"input_ids": input_ids, "labels": labels})
+            all_data.append({"input_ids": input_ids, "labels": labels, "attention_mask": attention_mask})
     print(
         "the number of skipping data is {}, the proportion is {}".format(skip_data_number, skip_data_number / (
                 len(all_data) + skip_data_number)))
@@ -103,27 +104,30 @@ class DataCollator(object):
         self.pad_token_id = tokenizer.pad_token_id
 
     def __call__(self, batch):
-        print(f"batch: {batch}")
+        # print(f"batch: {batch}")
         lengths = [len(instance["input_ids"]) for instance in batch]
 
         # batch_max_len = max(max(lengths), 4608)
         batch_max_len = max(lengths)
         # batch_max_len = math.ceil(max(lengths) / 8) * 8
         # print(batch_max_len)
-        input_ids_batch, labels_batch = [], []
+        input_ids_batch, labels_batch, attention_mask_batch = [], [], []
         for instance in batch:
             input_ids = instance["input_ids"]
             labels = instance["labels"]
+            attention_mask = instance["attention_mask"]
 
             padding_len = batch_max_len - len(input_ids)
             input_ids = input_ids + [self.pad_token_id] * padding_len
             labels = labels + [-100] * padding_len
-
+            attention_mask = attention_mask + [0] * padding_len
             input_ids_batch.append(input_ids)
             labels_batch.append(labels)
+            attention_mask_batch.append(attention_mask)
 
         return {"input_ids": torch.tensor(input_ids_batch, dtype=torch.long),
-                "labels": torch.tensor(labels_batch, dtype=torch.long)}
+                "labels": torch.tensor(labels_batch, dtype=torch.long),
+                "attention_mask": torch.tensor(attention_mask_batch, dtype=torch.long)}
 
 
 # Define and parse arguments.
@@ -333,10 +337,11 @@ def main(model_args, data_args, training_args):
     args.dataset_kwargs = {
         "append_concat_token": data_args.append_concat_token,
         "add_special_tokens": data_args.add_special_tokens,
+        "skip_prepare_dataset": True
     }
     args.dataset_text_field = data_args.dataset_text_field,
     args.max_seq_length = data_args.max_seq_length
-    args.remove_unused_columns = False
+    # args.remove_unused_columns = False
     args.label_names = ["labels"]
 
     # data_args.label_names = ["labels"]
@@ -384,12 +389,14 @@ def main(model_args, data_args, training_args):
 
 
 if __name__ == "__main__":
+    print("start train")
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
-    print(parser)
+    # print(parser)
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
+        print("do parse_args_into_dataclasses")
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     main(model_args, data_args, training_args)

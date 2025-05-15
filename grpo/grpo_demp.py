@@ -50,7 +50,13 @@ def extract_hash_answer(text: str):
 
 # uncomment middle messages for 1-shot prompting
 def get_gsm8k_questions(split="train") -> Dataset:
-    data = load_dataset('openai/gsm8k', 'main')[split]  # type: ignore
+    # data = load_dataset("openai/gsm8k", 'main')[split]  # type: ignore
+
+    data = load_dataset("parquet", data_files="../dataset/gsm8k/main/train-00000-of-00001.parquet", split="train")
+    # test_data = load_dataset("parquet", data_files="../dataset/gsm8k/main/test-00000-of-00001.parquet", split="train")
+
+    # data = {"train": train_data, "test": test_data}
+
     data = data.map(lambda x: {  # type: ignore
         'prompt': [
             {'role': 'system', 'content': SYSTEM_PROMPT},
@@ -122,14 +128,14 @@ def xmlcount_reward_func(completions, **kwargs) -> list[float]:
 
 
 # model_name = "meta-llama/Llama-3.2-1B-Instruct"
-model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+model_name = "/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct"
 
 if "Llama" in model_name:
     output_dir = "outputs/Llama-1B-GRPO"
     run_name = "Llama-1B-GRPO-gsm8k"
 else:
-    output_dir = "outputs/Qwen-1.5B-GRPO"
-    run_name = "Qwen-1.5B-GRPO-gsm8k"
+    output_dir = "./outputs/Qwen-0.5B-GRPO"
+    run_name = "Qwen-0.5B-GRPO-gsm8k"
 
 training_args = GRPOConfig(
     output_dir=output_dir,
@@ -152,6 +158,7 @@ training_args = GRPOConfig(
     max_grad_norm=0.1,
     report_to="wandb",
     log_on_each_node=False,
+    # use_flash_attn=False
 )
 peft_config = LoraConfig(
     r=16,
@@ -163,12 +170,14 @@ peft_config = LoraConfig(
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype=torch.bfloat16,
-    attn_implementation="flash_attention_2",
-    device_map=None
-).to("cuda")
+    attn_implementation="eager",
+    device_map=None).to("cuda")
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
 tokenizer.pad_token = tokenizer.eos_token
+tokenizer.padding_side = 'left'
+
+print(f"tokenizer.padding_side:{tokenizer.padding_side}")
 
 # use peft at your own risk; not working for me with multi-GPU training
 trainer = GRPOTrainer(
@@ -182,6 +191,10 @@ trainer = GRPOTrainer(
         correctness_reward_func],
     args=training_args,
     train_dataset=dataset,
-    # peft_config=peft_config
+    peft_config=peft_config
 )
 trainer.train()
+
+# CUDA_VISIBLE_DEVICE=0,1 nohup python3 grpo_demp.py > log.log 2>&1 &
+
+# CUDA_VISIBLE_DEVICES=0,1 accelerate launch grpo_demp.py
