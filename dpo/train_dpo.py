@@ -12,7 +12,7 @@ from datasets import load_dataset
 from trl import DPOConfig, DPOTrainer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_name_or_path="/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct/"
+model_name_or_path="/data/public_pretrain_models/Qwen2.5-0.5B-Instruct/"
 data_path = "../dataset/ultrafeedback_binarized/"
 model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
 tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)

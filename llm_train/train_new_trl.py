@@ -277,13 +277,8 @@ def main(model_args, data_args, training_args):
     if training_args.gradient_checkpointing:
         training_args.gradient_checkpointing_kwargs = {"use_reentrant": model_args.use_reentrant}
 
-    # datasets
-    # train_dataset, eval_dataset = create_datasets(
-    #     tokenizer,
-    #     data_args,
-    #     training_args,
-    #     apply_chat_template=model_args.chat_template_format != "none",
-    # )
+    from datasets import load_dataset
+
 
     train_dataset = build_qwen2_prompt_dataset(data_args.train_path, tokenizer, data_args.max_seq_length,
                                                data_args.max_src_length, True)
@@ -291,38 +286,8 @@ def main(model_args, data_args, training_args):
     eval_dataset = build_qwen2_prompt_dataset(data_args.test_path, tokenizer, data_args.max_seq_length,
 
                                               data_args.max_src_length, True)
-    from collections import Counter
-    keys = []
 
-    for item in train_dataset:
-        keys += list(item.keys())
-        # if "labels" not in item:
-        #     print(item)
-        #     exit()
-        # print(f"train_dataset: {item}")
-        # break
-    print(f"train_dataset: {Counter(keys)}")
 
-    keys = []
-
-    for item in eval_dataset:
-        keys += list(item.keys())
-        # if "labels" not in item:
-        #     print(item)
-        #     exit()
-        # print(f"train_dataset: {item}")
-        # break
-    print(f"eval_dataset: {Counter(keys)}")
-
-    for item in eval_dataset:
-        # if "labels" not in item:
-        #     print(item)
-        #     exit()
-        print(f"eval_dataset: {item}")
-        break
-    print(f"=" * 30)
-    print(f"training_args:{training_args}")
-    print(f"=" * 30)
 
     # print(f"training_args:{training_args}")
 

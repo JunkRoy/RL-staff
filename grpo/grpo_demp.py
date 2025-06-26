@@ -128,7 +128,7 @@ def xmlcount_reward_func(completions, **kwargs) -> list[float]:
 
 
 # model_name = "meta-llama/Llama-3.2-1B-Instruct"
-model_name = "/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct"
+model_name = "/data/public_pretrain_models/Qwen2.5-0.5B-Instruct"
 
 if "Llama" in model_name:
     output_dir = "outputs/Llama-1B-GRPO"

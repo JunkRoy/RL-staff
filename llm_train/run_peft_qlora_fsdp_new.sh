@@ -1,7 +1,7 @@
 ACCELERATE_LOG_LEVEL=info CUDA_VISIBLE_DEVICES=0,1 accelerate launch --config_file "./fsdp_config_qlora.yaml"  train_new_trl.py --model_name_or_path "/iyunwen/data/public_pretrain_models/Qwen2.5-0.5B-Instruct/" \
 --seed 100 \
---train_path "/iyunwen/data/work/syshen/data/yw_greeting_dataset/greetings_train.jsonl" \
---test_path "/iyunwen/data/work/syshen/data/yw_greeting_dataset/greetings_test.jsonl" \
+--train_path "./data/yw_greeting_dataset/greetings_train.jsonl" \
+--test_path "./data/yw_greeting_dataset/greetings_test.jsonl" \
 --add_special_tokens False \
 --append_concat_token False \
 --splits "train,test" \
